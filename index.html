@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing Buddy - Smart Shopping Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            height: 90vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .message.assistant .message-avatar {
+            background: #f0f0f0;
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 15px;
+            white-space: pre-wrap;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .message.assistant .message-content {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .search-links {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+        }
+
+        .search-links-title {
+            font-weight: 600;
+            font-size: 15px;
+            color: #333;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-link-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .search-link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .search-link-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .search-link-btn .icon {
+            font-size: 18px;
+        }
+
+        .error-message {
+            background: #ffebee !important;
+            color: #c62828 !important;
+            border: 1px solid #ef5350;
+        }
+
+        .suggestions {
+            padding: 15px 20px;
+            border-top: 1px solid #e0e0e0;
+            background: #fafafa;
+        }
+
+        .suggestions-title {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .suggestion-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .suggestion-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #333;
+        }
+
+        .suggestion-btn:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        #userInput {
+            flex: 1;
+            padding: 12px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #userInput:focus {
+            border-color: #667eea;
+        }
+
+        #sendBtn {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #sendBtn:hover {
+            transform: scale(1.1);
+        }
+
+        #sendBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 12px 16px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #999;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #999;
+        }
+
+        .empty-state h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+
+            .suggestion-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗💻 Pricing Buddy</h1>
+            <p>AI-powered shopping assistant for cars & tech</p>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="empty-state">
+                <h2>👋 Welcome!</h2>
+                <p>Ask me about cars, tech products, or get shopping advice!</p>
+            </div>
+        </div>
+
+        <div class="suggestions">
+            <div class="suggestions-title">Try asking:</div>
+            <div class="suggestion-buttons">
+                <button class="suggestion-btn" onclick="useSuggestion(this)">Find 2019-2020 Honda Civic under $17k near 93710</button>
+                <button class="suggestion-btn" onclick="useSuggestion(this)">What's a good laptop for college under $800?</button>
+                <button class="suggestion-btn" onclick="useSuggestion(this)">Show me Toyota Camry within 25 miles of 90210</button>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Ask about cars, tech, or any product..." />
+                <button id="sendBtn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========================================
+        // 🔑 PASTE YOUR OPENAI API KEY HERE
+        // ========================================
+        const OPENAI_API_KEY = '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';
+        // ========================================
+
+        const chatMessages = document.getElementById('chatMessages');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        let conversationHistory = [];
+
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        function useSuggestion(btn) {
+            userInput.value = btn.textContent;
+            sendMessage();
+        }
+
+        function clearEmptyState() {
+            const emptyState = chatMessages.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+
+        function addMessage(text, type, isError = false) {
+            clearEmptyState();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = type === 'user' ? '👤' : '🤖';
+            
+            const content = document.createElement('div');
+            content.className = `message-content ${isError ? 'error-message' : ''}`;
+            content.textContent = text;
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        function addCarSearchLinks(carInfo) {
+            clearEmptyState();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content';
+            content.style.maxWidth = '85%';
+            
+            const linksContainer = document.createElement('div');
+            linksContainer.className = 'search-links';
+            
+            const title = document.createElement('div');
+            title.className = 'search-links-title';
+            title.innerHTML = '🔍 Search these sites for the best deals:';
+            linksContainer.appendChild(title);
+            
+            const buttonsContainer = document.createElement('div');
+            buttonsContainer.className = 'search-link-buttons';
+            
+            // Generate search URLs
+            const searchQuery = `${carInfo.year || ''} ${carInfo.make || ''} ${carInfo.model || ''}`.trim();
+            
+            // Autotrader
+            const autotraderUrl = `https://www.autotrader.com/cars-for-sale/all-cars/${carInfo.zip || ''}?${carInfo.make ? `makeCodeList=${carInfo.make.toUpperCase()}&` : ''}${carInfo.model ? `modelCodeList=${carInfo.model.toUpperCase()}&` : ''}${carInfo.year ? `yearCodeMin=${carInfo.year}&yearCodeMax=${carInfo.year}&` : ''}${carInfo.price_max ? `maxPrice=${carInfo.price_max}&` : ''}${carInfo.radius ? `searchRadius=${carInfo.radius}` : 'searchRadius=50'}`;
+            
+            // Cars.com
+            const carsUrl = `https://www.cars.com/shopping/results/?${carInfo.make ? `makes[]=${carInfo.make}&` : ''}${carInfo.model ? `models[]=${carInfo.make}-${carInfo.model}&` : ''}${carInfo.year ? `year_min=${carInfo.year}&year_max=${carInfo.year}&` : ''}${carInfo.price_max ? `maximum_distance=${carInfo.price_max}&` : ''}${carInfo.zip ? `zip=${carInfo.zip}` : ''}`;
+            
+            // CarGurus
+            const cargurusUrl = `https://www.cargurus.com/Cars/inventorylisting/viewDetailsFilterViewInventoryListing.action?${carInfo.zip ? `zip=${carInfo.zip}&` : ''}${carInfo.radius ? `distance=${carInfo.radius}&` : 'distance=50&'}${carInfo.make ? `#makes=${carInfo.make}` : ''}`;
+            
+            const links = [
+                { name: 'Autotrader', url: autotraderUrl, icon: '🚗' },
+                { name: 'Cars.com', url: carsUrl, icon: '🔵' },
+                { name: 'CarGurus', url: cargurusUrl, icon: '🟢' }
+            ];
+            
+            links.forEach(link => {
+                const btn = document.createElement('a');
+                btn.className = 'search-link-btn';
+                btn.href = link.url;
+                btn.target = '_blank';
+                btn.innerHTML = `
+                    <span>${link.icon} ${link.name}</span>
+                    <span class="icon">→</span>
+                `;
+                buttonsContainer.appendChild(btn);
+            });
+            
+            linksContainer.appendChild(buttonsContainer);
+            content.appendChild(linksContainer);
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function addTypingIndicator() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message assistant';
+            messageDiv.id = 'typingIndicator';
+            
+            const avatar = document.createElement('div');
+            avatar.className = 'message-avatar';
+            avatar.textContent = '🤖';
+            
+            const content = document.createElement('div');
+            content.className = 'message-content typing-indicator';
+            content.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(content);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeTypingIndicator() {
+            const indicator = document.getElementById('typingIndicator');
+            if (indicator) {
+                indicator.remove();
+            }
+        }
+
+        async function callOpenAI(userMessage, systemPrompt = null) {
+            conversationHistory.push({
+                role: 'user',
+                content: userMessage
+            });
+
+            try {
+                const response = await fetch('https://api.openai.com/v1/chat/completions', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [
+                            {
+                                role: 'system',
+                                content: systemPrompt || 'You are Pricing Buddy, a helpful shopping assistant for cars and tech products. Help users find the best deals, compare options, and make informed purchasing decisions. Be concise, friendly, and practical. When discussing cars, provide helpful tips about what to look for, fair pricing, and negotiation strategies.'
+                            },
+                            ...conversationHistory
+                        ],
+                        max_tokens: 400,
+                        temperature: 0.7
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('OpenAI API request failed');
+                }
+
+                const data = await response.json();
+                const assistantMessage = data.choices[0].message.content;
+                
+                conversationHistory.push({
+                    role: 'assistant',
+                    content: assistantMessage
+                });
+
+                return assistantMessage;
+            } catch (error) {
+                throw error;
+            }
+        }
+
+        function parseCarQuery(message) {
+            const lowerMsg = message.toLowerCase();
+            
+            // Check if it's a car query
+            const carKeywords = ['car', 'vehicle', 'honda', 'toyota', 'ford', 'civic', 'camry', 'accord', 'corolla', 'suv', 'sedan', 'truck', 'bmw', 'mercedes', 'audi', 'chevrolet', 'nissan', 'mazda', 'hyundai', 'kia'];
+            const hasCarKeyword = carKeywords.some(keyword => lowerMsg.includes(keyword));
+            const hasZipCode = /\b\d{5}\b/.test(message);
+            const hasYear = /\b(19|20)\d{2}\b/.test(message);
+            
+            const isCarQuery = hasCarKeyword || (hasZipCode && hasYear);
+
+            if (!isCarQuery) return null;
+
+            const carInfo = {};
+
+            // Extract year
+            const yearMatch = message.match(/(\d{4})\s*-\s*(\d{4})|(\d{4})/);
+            if (yearMatch) {
+                carInfo.year = yearMatch[3] || yearMatch[1];
+            }
+
+            // Extract make
+            const makes = ['honda', 'toyota', 'ford', 'chevrolet', 'nissan', 'bmw', 'mercedes', 'audi', 'hyundai', 'kia', 'mazda', 'subaru', 'volkswagen', 'jeep', 'ram', 'gmc'];
+            makes.forEach(make => {
+                if (lowerMsg.includes(make)) {
+                    carInfo.make = make.charAt(0).toUpperCase() + make.slice(1);
+                }
+            });
+
+            // Extract model
+            const models = ['civic', 'accord', 'camry', 'corolla', 'f150', 'silverado', 'altima', 'maxima', 'crv', 'rav4', 'highlander', 'pilot'];
+            models.forEach(model => {
+                if (lowerMsg.includes(model)) {
+                    carInfo.model = model.charAt(0).toUpperCase() + model.slice(1);
+                }
+            });
+
+            // Extract price
+            const priceMatch = message.match(/under\s*\$?(\d+)k?/i);
+            if (priceMatch) {
+                let price = parseInt(priceMatch[1]);
+                if (price < 100) price *= 1000;
+                carInfo.price_max = price;
+            }
+
+            // Extract zip code
+            const zipMatch = message.match(/\b(\d{5})\b/);
+            if (zipMatch) {
+                carInfo.zip = zipMatch[1];
+            }
+
+            // Extract radius
+            const radiusMatch = message.match(/within\s+(\d+)\s+miles?/i);
+            if (radiusMatch) {
+                carInfo.radius = radiusMatch[1];
+            }
+
+            return Object.keys(carInfo).length > 0 ? carInfo : null;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            if (OPENAI_API_KEY === 'YOUR_OPENAI_API_KEY_HERE') {
+                addMessage('⚠️ Please add your OpenAI API key in the code! Find line 367 and replace YOUR_OPENAI_API_KEY_HERE with your actual key.', 'assistant', true);
+                return;
+            }
+
+            addMessage(message, 'user');
+            userInput.value = '';
+            sendBtn.disabled = true;
+            addTypingIndicator();
+
+            try {
+                // Check if it's a car search query
+                const carInfo = parseCarQuery(message);
+                
+                if (carInfo) {
+                    // Get AI advice about the car search
+                    const aiResponse = await callOpenAI(
+                        `User is looking for: ${JSON.stringify(carInfo)}. Give brief advice (2-3 sentences) about this car, what to look for, fair pricing, or tips for their search.`
+                    );
+                    removeTypingIndicator();
+                    addMessage(aiResponse, 'assistant');
+                    
+                    // Add search links
+                    addCarSearchLinks(carInfo);
+                } else {
+                    // Regular AI chat for tech/general questions
+                    const response = await callOpenAI(message);
+                    removeTypingIndicator();
+                    addMessage(response, 'assistant');
+                }
+            } catch (error) {
+                removeTypingIndicator();
+                let errorMsg = error.message;
+                
+                if (errorMsg.includes('401')) {
+                    errorMsg = 'Invalid API key! Please check your OpenAI API key in the code.';
+                } else if (errorMsg.includes('429')) {
+                    errorMsg = 'Rate limit exceeded. Please wait and try again.';
+                } else if (errorMsg.includes('quota')) {
+                    errorMsg = 'API quota exceeded. Please check your OpenAI account billing.';
+                }
+                
+                addMessage(`Error: ${errorMsg}`, 'assistant', true);
+                console.error('Error:', error);
+            }
+
+            sendBtn.disabled = false;
+            userInput.focus();
+        }
+
+        // Initialize
+        userInput.focus();
+    </script>
+</body>
+</html>
